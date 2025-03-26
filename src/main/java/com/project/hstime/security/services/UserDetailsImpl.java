@@ -1,6 +1,5 @@
 package com.project.hstime.security.services;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.hstime.models.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,25 +15,20 @@ public class UserDetailsImpl implements UserDetails {
   private static final long serialVersionUID = 1L;
 
   private Long id;
-
-  private String username;
-
-  private String correo;
-
+  private String email;  // Cambiado de 'correo' a 'email' para consistencia
   private int idHotel;
-
   private String DNI;
 
   @JsonIgnore
-  private String contrasenya;
+  private String password;
 
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(Long id, String correo, String contrasenya, int idHotel, String DNI,
-      Collection<? extends GrantedAuthority> authorities) {
+  public UserDetailsImpl(Long id, String email, String password, int idHotel, String DNI,
+                         Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
-    this.correo = correo;
-    this.contrasenya = contrasenya;
+    this.email = email;
+    this.password = password;
     this.idHotel = idHotel;
     this.DNI = DNI;
     this.authorities = authorities;
@@ -42,29 +36,37 @@ public class UserDetailsImpl implements UserDetails {
 
   public static UserDetailsImpl build(User user) {
     List<GrantedAuthority> authorities = user.getRoles().stream()
-        .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-        .collect(Collectors.toList());
+            .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+            .collect(Collectors.toList());
 
     return new UserDetailsImpl(
-        user.getId(),
-        user.getEmail(),
-        user.getPassword(),
-        user.getIdHotel(),
-        user.getDNI(),
-        authorities);
+            user.getId(),
+            user.getEmail(),    // Asegúrate que User.getEmail() existe
+            user.getPassword(), // Asegúrate que User.getPassword() existe
+            user.getIdHotel(),
+            user.getDNI(),
+            authorities);
   }
 
+  // Métodos de UserDetails
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return authorities;
   }
 
-  public Long getId() {
-    return id;
+  @Override
+  public String getPassword() {
+    return password;
   }
 
-  public String getCorreo() {
-    return correo;
+  @Override
+  public String getUsername() {
+    return email;  // Devuelve el email como 'username' requerido por Spring Security
+  }
+
+  // Métodos adicionales
+  public Long getId() {
+    return id;
   }
 
   public int getIdHotel() {
@@ -75,16 +77,7 @@ public class UserDetailsImpl implements UserDetails {
     return DNI;
   }
 
-  @Override
-  public String getPassword() {
-    return contrasenya;
-  }
-
-  @Override
-  public String getUsername() {
-    return username;
-  }
-
+  // Métodos de estado de cuenta (siempre true si no necesitas esta funcionalidad)
   @Override
   public boolean isAccountNonExpired() {
     return true;
@@ -107,11 +100,14 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     UserDetailsImpl user = (UserDetailsImpl) o;
     return Objects.equals(id, user.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

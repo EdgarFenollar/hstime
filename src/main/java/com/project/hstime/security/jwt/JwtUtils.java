@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -46,18 +47,42 @@ public class JwtUtils {
 
 
   // Extraer el nombre de usuario desde el token JWT
-  public String getUserNameFromJwtToken(String token) {
-    try {
-      return Jwts.parser()
-              .setSigningKey(getSigningKey())
-              .build()
-              //.parseClaimsJws(token)
-              .parseSignedClaims(token)
-              .getBody()
-              .getSubject(); // Extraer el nombre de usuario (subject)
-    } catch (JwtException e) {
-      logger.error("Error parsing JWT token: {}", e.getMessage());
+  public String getEmailFromJwtToken(String token) throws JwtException {
+    if (!StringUtils.hasText(token)) {
+      logger.warn("Attempted to parse empty or null JWT token");
       return null;
+    }
+
+    try {
+      Claims claims = Jwts.parser()
+              .verifyWith(getSigningKey())
+              .build()
+              .parseSignedClaims(token)
+              .getPayload();
+
+      String email = claims.getSubject();
+
+      if (!StringUtils.hasText(email)) {
+        logger.error("JWT token has empty subject (email)");
+        return null;
+      }
+
+      // Optional: Validate email format if needed
+      if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        logger.warn("JWT token contains invalid email format: {}", email);
+        return null;
+      }
+
+      return email;
+    } catch (ExpiredJwtException ex) {
+      logger.warn("Expired JWT token: {}", ex.getMessage());
+      throw ex;
+    } catch (MalformedJwtException ex) {
+      logger.error("Invalid JWT token: {}", ex.getMessage());
+      throw ex;
+    } catch (JwtException ex) {
+      logger.error("JWT processing error: {}", ex.getMessage());
+      throw ex;
     }
   }
 

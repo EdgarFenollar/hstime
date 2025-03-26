@@ -130,37 +130,6 @@ public class AuthController {
     return ResponseEntity.ok(isValid);
   }
 
-  @Operation(summary = "Obtener usuarios por nombre parcial", description = """
-          Busca usuarios cuyos nombres contengan la cadena proporcionada.
-          **Permisos requeridos**: Solo para administradores y redsctores.
-          """)
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Usuarios obtenidos exitosamente.",
-                  content = @Content(schema = @Schema(implementation = User.class))),
-          @ApiResponse(responseCode = "404", description = "No se encontraron usuarios con el nombre proporcionado.",
-                  content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-          @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
-                  content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
-  @GetMapping("/search")
-  @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-  public ResponseEntity<?> searchUsersByName(@RequestParam String email) {
-    try {
-      List<User> users = userRepository.findByEmailContainingIgnoreCase(email);
-      if (users.isEmpty()) {
-        return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND)
-                .body(new MessageResponse("No se encontraron usuarios con el nombre: " + email));
-      }
-
-      return ResponseEntity.ok(users);
-    } catch (Exception e) {
-      logger.error("Error al buscar usuarios: {}", e.getMessage());
-      return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-              .body(new MessageResponse("Error: " + e.getMessage()));
-    }
-  }
-
-
   @Operation(summary = "Metodo para iniciar sesion", description = """
           Inicia sesin como usuario.
           **Permisos requeridos**: Accesible para todos.
@@ -191,7 +160,7 @@ public class AuthController {
 
     return ResponseEntity.ok(new JwtResponse(jwt,
             userDetails.getId(),
-            userDetails.getCorreo(),
+            userDetails.getUsername(),
             userDetails.getIdHotel(),
             userDetails.getDNI(),
             roles));
