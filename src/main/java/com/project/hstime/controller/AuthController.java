@@ -6,6 +6,8 @@ import com.project.hstime.models.Role;
 import com.project.hstime.models.User;
 import com.project.hstime.payload.request.LoginRequest;
 import com.project.hstime.payload.request.SignupRequest;
+import com.project.hstime.payload.request.UpdateUserRequest;
+import com.project.hstime.payload.response.ErrorResponseUpdate;
 import com.project.hstime.payload.response.JwtResponse;
 import com.project.hstime.payload.response.MessageResponse;
 import com.project.hstime.repository.RoleRepository;
@@ -229,79 +231,72 @@ public class AuthController {
     }
   }
 
-  @Operation(summary = "Actualizar un usuario (conservando la contraseña si no se proporciona una nueva)", description = """
-          Actualiza los datos de un usuario existente por su id.
-          Si no se proporciona una nueva contraseña, se conserva la anterior.
-          **Permisos requeridos**: Solo para administradores.
-          """)
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente.",
-                  content = @Content(schema = @Schema(implementation = MessageResponse.class))),
-          @ApiResponse(responseCode = "404", description = "Usuario no encontrado.",
-                  content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-          @ApiResponse(responseCode = "400", description = "Datos mal formados o campos obligatorios faltantes.",
-                  content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-          @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
-                  content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-  })
   @PutMapping("/update/{id}")
-  @PreAuthorize("hasRole('ADMINISTRADOR')")
-  public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody SignupRequest signUpRequest) {
+  @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+  public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest) {
     try {
       // Verificar si el usuario existe
-      Optional<User> existingUserOpt = userRepository.findById(id);
-      if (!existingUserOpt.isPresent()) {
-        return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND)
-                .body(new MessageResponse("Error: Usuario no encontrado."));
+      User existingUser = userRepository.findById(id)
+              .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
+
+      // Actualizar email si se proporciona y es diferente
+      if (updateUserRequest.getEmail() != null && !updateUserRequest.getEmail().equals(existingUser.getEmail())) {
+        if (userRepository.existsByEmail(updateUserRequest.getEmail())) {
+          return ResponseEntity
+                  .badRequest()
+                  .body(new ErrorResponseUpdate("Error: El email ya está en uso!"));
+        }
+        existingUser.setEmail(updateUserRequest.getEmail());
       }
 
-      User user = existingUserOpt.get();
-
-      if (!user.getEmail().equals(signUpRequest.getEmail()) && userRepository.existsByEmail(signUpRequest.getEmail())) {
-        return ResponseEntity.badRequest().body(new MessageResponse("Error: El correo electrónico ya está en uso."));
+      // Actualizar contraseña solo si se proporciona
+      if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
+        existingUser.setPassword(encoder.encode(updateUserRequest.getPassword()));
       }
 
-      // Actualizar los datos del usuario
-      user.setEmail(signUpRequest.getEmail());
-
-      // **Si la nueva contraseña no es proporcionada, se mantiene la anterior**
-      if (signUpRequest.getPassword() != null && !signUpRequest.getPassword().isEmpty()) {
-        user.setPassword(encoder.encode(signUpRequest.getPassword())); // Solo actualizar si se proporciona una nueva contraseña
+      // Actualizar hotel ID si se proporciona
+      if (updateUserRequest.getIdHotel() != 0) {
+        existingUser.setIdHotel(updateUserRequest.getIdHotel());
       }
 
-      // Actualizar los roles
-      Set<String> strRoles = signUpRequest.getRole();
-      Set<Role> roles = new HashSet<>();
+      // Actualizar DNI si se proporciona
+      if (updateUserRequest.getDNI() != null) {
+        existingUser.setDNI(updateUserRequest.getDNI());
+      }
 
-      if (strRoles == null) {
-        Role userRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
-                .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
-        roles.add(userRole);
-      } else {
-        strRoles.forEach(role -> {
-          switch (role) {
-            case "admin" -> {
-              Role adminRole = roleRepository.findByName(ERole.ROLE_ADMINISTRADOR)
-                      .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
-              roles.add(adminRole);
+      // Actualizar roles si se proporcionan
+      if (updateUserRequest.getRoles() != null && !updateUserRequest.getRoles().isEmpty()) {
+        Set<Role> roles = new HashSet<>();
+
+        for (String roleStr : updateUserRequest.getRoles()) {
+          ERole roleEnum;
+          try {
+            if (roleStr.equalsIgnoreCase("admin")) {
+              roleEnum = ERole.ROLE_ADMINISTRADOR;
+            } else if (roleStr.equalsIgnoreCase("cliente")) {
+              roleEnum = ERole.ROLE_CLIENTE;
+            } else {
+              throw new RuntimeException("Rol no válido: " + roleStr);
             }
-            default -> {
-              Role clientRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
-                      .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
-              roles.add(clientRole);
-            }
+
+            Role role = roleRepository.findByName(roleEnum)
+                    .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
+            roles.add(role);
+          } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error: Rol no válido.");
           }
-        });
+        }
+
+        existingUser.setRoles(roles);
       }
 
-      user.setRoles(roles);
-      userRepository.save(user);
+      userRepository.save(existingUser);
 
-      return ResponseEntity.ok(new MessageResponse("Usuario actualizado correctamente."));
-    } catch (Exception e) {
-      logger.error("Error al actualizar el usuario: {}", e.getMessage());
-      return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-              .body(new MessageResponse("Error: " + e.getMessage()));
+      return ResponseEntity.ok(new MessageResponse("Usuario actualizado exitosamente!"));
+    } catch (RuntimeException e) {
+      return ResponseEntity
+              .badRequest()
+              .body(new ErrorResponseUpdate(e.getMessage()));
     }
   }
 

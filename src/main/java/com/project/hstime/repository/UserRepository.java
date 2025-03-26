@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Boolean existsByEmail(String email);
 
+  Boolean existsByDNI(String dni);
+
   //Para que usuario pueda editar sus atributos
   Optional<User> findById(Long id);
 
