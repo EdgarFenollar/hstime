@@ -21,7 +21,7 @@ public class Marcaje {
     @Column
     private Date fechaHora;
 
-    @Column
+    @Column(columnDefinition = "POINT")
     private Point localizacion;
 
     @Column(columnDefinition = "CHAR(1) DEFAULT 'N'")

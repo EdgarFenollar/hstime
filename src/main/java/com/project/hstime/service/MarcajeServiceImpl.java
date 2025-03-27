@@ -43,6 +43,11 @@ public class MarcajeServiceImpl implements MarcajeService{
     }
 
     @Override
+    public Set<Marcaje> findByRangoFechas(Date fechaInicio, Date fechaFin) {
+        return marcajeRepository.findByFechaHoraBetween(fechaInicio, fechaFin);
+    }
+
+    @Override
     public Marcaje modifyMarcaje(long idMarcaje, Marcaje newMarcaje) {
         Marcaje marcaje = marcajeRepository.findByIdMarcaje(idMarcaje)
                 .orElseThrow(() -> new MarcajeNotFoundException(idMarcaje));
@@ -57,11 +62,11 @@ public class MarcajeServiceImpl implements MarcajeService{
     }
 
     @Override
-    public Marcaje descargarMarcaje(long idMarcaje, Marcaje newMarcaje) {
+    public Marcaje descargarMarcaje(long idMarcaje) {
         Marcaje marcaje = marcajeRepository.findByIdMarcaje(idMarcaje)
                 .orElseThrow(() -> new MarcajeNotFoundException(idMarcaje));
 
-        marcaje.setDescargado(newMarcaje.getDescargado());
+        marcaje.setDescargado('S');
 
         return marcajeRepository.save(marcaje);
     }

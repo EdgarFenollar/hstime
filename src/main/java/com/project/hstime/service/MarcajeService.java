@@ -13,13 +13,13 @@ public interface MarcajeService {
     Optional<Marcaje> findByIdMarcaje(long idMarcaje);
     Set<Marcaje> findByIdHotelAndIdTrabajador(int idHotel, int idTrabajador);
     Set<Marcaje> findByFechaHora(Date fechaHora);
-
+    Set<Marcaje> findByRangoFechas(Date fechaInicio, Date fechaFin);
     //Metodo de añadir
     Marcaje addMarcaje(Marcaje marcaje);
     //Metodo modificar
     Marcaje modifyMarcaje(long idMarcaje, Marcaje newMarcaje);
     //Metodo descargar
-    Marcaje descargarMarcaje(long idMarcaje, Marcaje newMarcaje);
+    Marcaje descargarMarcaje(long idMarcaje);
     //Metodo eliminar
     void deleteMarcaje(long idMarcaje);
 }
