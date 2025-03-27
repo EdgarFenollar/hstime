@@ -14,6 +14,8 @@ public class UpdateUserRequest {
 
     private int IdHotel;
 
+    private int IdTrabajador;
+
     private String DNI;
 
     private Set<String> roles;
@@ -41,6 +43,14 @@ public class UpdateUserRequest {
 
     public void setIdHotel(int idHotel) {
         IdHotel = idHotel;
+    }
+
+    public int getIdTrabajador() {
+        return IdTrabajador;
+    }
+
+    public void setIdTrabajador(int idTrabajador) {
+        IdTrabajador = idTrabajador;
     }
 
     public String getDNI() {

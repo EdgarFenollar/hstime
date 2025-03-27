@@ -87,7 +87,7 @@ public class AuthController {
     }
   }
 
-  @Operation(summary = "Obtener usuarios por su id", description = """
+  @Operation(summary = "Obtener usuarios por su ID de hotel y ID de trabajador", description = """
           Busca usuarios por su id.
           **Permisos requeridos**: Solo para administradores y redactores.
           """)
@@ -99,15 +99,16 @@ public class AuthController {
           @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
                   content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
-  @GetMapping("/user/{id}")
+  @GetMapping("/user/search/{idHotel}/{idTrabajador}")
   @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-  public ResponseEntity<User> getUsuarioById(@PathVariable Long id) {
-    Optional<User> user = userRepository.findById(id);
-    if (user.isPresent()) {
-      return ResponseEntity.ok(user.get());
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<User> getUsuarioByIdHotelAndIdTrabajador(
+          @PathVariable int idHotel,
+          @PathVariable int idTrabajador) {
+
+    Optional<User> user = userRepository.findByIdHotelAndIdTrabajador(idHotel, idTrabajador);
+
+    return user.map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @Operation(summary = "Comprobar validez del token", description = """
@@ -164,6 +165,7 @@ public class AuthController {
             userDetails.getId(),
             userDetails.getUsername(),
             userDetails.getIdHotel(),
+            userDetails.getIdTrabajador(),
             userDetails.getDNI(),
             roles));
   }
@@ -185,37 +187,46 @@ public class AuthController {
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
     try {
-
       if (userRepository.existsByEmail(signUpRequest.getEmail())) {
         return ResponseEntity
                 .badRequest()
-                .body(new MessageResponse("El correo ya esta en uso."));
+                .body(new MessageResponse("Error: El correo electrónico ya está registrado."));
       }
 
-      // Create new user's account
-      User user = new User(signUpRequest.getEmail(),
-              encoder.encode(signUpRequest.getPassword()), signUpRequest.getIdHotel(), signUpRequest.getDNI());
+      if (userRepository.existsByIdHotelAndIdTrabajador(
+              signUpRequest.getIdHotel(),
+              signUpRequest.getIdTrabajador())) {
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: Ya existe un usuario con esta combinación de Hotel y Trabajador."));
+      }
+
+      User user = new User(
+              signUpRequest.getEmail(),
+              encoder.encode(signUpRequest.getPassword()),
+              signUpRequest.getIdHotel(),
+              signUpRequest.getIdTrabajador(),
+              signUpRequest.getDNI());
 
       Set<String> strRoles = signUpRequest.getRole();
       Set<Role> roles = new HashSet<>();
 
-      if (strRoles == null) {
-        Role userRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
+      if (strRoles == null || strRoles.isEmpty()) {
+        Role clientRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
+                .orElseThrow(() -> new RuntimeException("Error: Rol CLIENTE no encontrado."));
+        roles.add(clientRole);
       } else {
         strRoles.forEach(role -> {
-          switch (role) {
-            case "admin" -> {
+          switch (role.toLowerCase()) {
+            case "admin":
               Role adminRole = roleRepository.findByName(ERole.ROLE_ADMINISTRADOR)
-                      .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                      .orElseThrow(() -> new RuntimeException("Error: Rol ADMINISTRADOR no encontrado."));
               roles.add(adminRole);
-            }
-            default -> {
-              Role clientRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
-                      .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-              roles.add(clientRole);
-            }
+              break;
+            default:
+              Role defaultRole = roleRepository.findByName(ERole.ROLE_CLIENTE)
+                      .orElseThrow(() -> new RuntimeException("Error: Rol CLIENTE no encontrado."));
+              roles.add(defaultRole);
           }
         });
       }
@@ -223,20 +234,36 @@ public class AuthController {
       user.setRoles(roles);
       userRepository.save(user);
 
-      return ResponseEntity.ok(new MessageResponse("Usuario registrado correctamente."));
-    } catch (Exception e) {
-      logger.error("Registration error: {}", e.getMessage());
-      return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+      return ResponseEntity.ok(new MessageResponse("Usuario registrado exitosamente!"));
+
+    } catch (RuntimeException e) {
+      logger.error("Error en el registro: {}", e.getMessage());
+      return ResponseEntity
+              .internalServerError()
               .body(new MessageResponse("Error: " + e.getMessage()));
     }
   }
 
-  @PutMapping("/update/{id}")
+  @Operation(summary = "Actualizar un usuario por ID de hotel y ID de trabajador", description = """
+          Actualiza un usuario existente basado en su ID.
+          **Permisos requeridos**: Solo administradores.
+          """)
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente.",
+                  content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+          @ApiResponse(responseCode = "404", description = "Usuario no encontrado.",
+                  content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+          @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
+                  content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  @PutMapping("user/update/{idHotel}/{idTrabajador}")
   @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
-  public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+  public ResponseEntity<?> updateUser(
+          @PathVariable int idHotel,
+          @PathVariable int idTrabajador,
+          @Valid @RequestBody UpdateUserRequest updateUserRequest) {
     try {
-      // Verificar si el usuario existe
-      User existingUser = userRepository.findById(id)
+      User existingUser = userRepository.findByIdHotelAndIdTrabajador(idHotel, idTrabajador)
               .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
 
       // Actualizar email si se proporciona y es diferente
@@ -257,6 +284,11 @@ public class AuthController {
       // Actualizar hotel ID si se proporciona
       if (updateUserRequest.getIdHotel() != 0) {
         existingUser.setIdHotel(updateUserRequest.getIdHotel());
+      }
+
+      // Actualizar trabajador ID si se proporciona
+      if (updateUserRequest.getIdTrabajador() != 0) {
+        existingUser.setIdTrabajador(updateUserRequest.getIdTrabajador());
       }
 
       // Actualizar DNI si se proporciona
@@ -300,7 +332,7 @@ public class AuthController {
     }
   }
 
-  @Operation(summary = "Eliminar un usuario por ID", description = """
+  @Operation(summary = "Eliminar un usuario por ID de hotel y ID de trabajador", description = """
           Elimina un usuario existente basado en su ID.
           **Permisos requeridos**: Solo administradores.
           """)
@@ -312,17 +344,22 @@ public class AuthController {
           @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
                   content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/user/delete/{idHotel}/{idTrabajador}")
   @PreAuthorize("hasRole('ADMINISTRADOR')")
-  public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+  public ResponseEntity<?> deleteUser(
+          @PathVariable int idHotel,
+          @PathVariable int idTrabajador) {
     try {
-      if (!userRepository.existsById(id)) {
+      Optional<User> userOptional = userRepository.findByIdHotelAndIdTrabajador(idHotel, idTrabajador);
+
+      if (userOptional.isEmpty()) {
         return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND)
                 .body(new MessageResponse("Error: Usuario no encontrado."));
       }
 
-      // Aquí se realiza la eliminación del usuario
-      userRepository.deleteUserById(id);
+      Long userId = userOptional.get().getId();
+
+      userRepository.deleteUserById(userId);
 
       return ResponseEntity.ok(new MessageResponse("Usuario eliminado correctamente."));
     } catch (Exception e) {
@@ -331,6 +368,4 @@ public class AuthController {
               .body(new MessageResponse("Error: " + e.getMessage()));
     }
   }
-
-
 }

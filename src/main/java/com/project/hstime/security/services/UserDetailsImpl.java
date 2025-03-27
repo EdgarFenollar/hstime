@@ -15,8 +15,9 @@ public class UserDetailsImpl implements UserDetails {
   private static final long serialVersionUID = 1L;
 
   private Long id;
-  private String email;  // Cambiado de 'correo' a 'email' para consistencia
+  private String email;
   private int idHotel;
+  private int idTrabajador;
   private String DNI;
 
   @JsonIgnore
@@ -24,12 +25,13 @@ public class UserDetailsImpl implements UserDetails {
 
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(Long id, String email, String password, int idHotel, String DNI,
+  public UserDetailsImpl(Long id, String email, String password, int idHotel, int idTrabajador, String DNI,
                          Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
     this.email = email;
     this.password = password;
     this.idHotel = idHotel;
+    this.idTrabajador = idTrabajador;
     this.DNI = DNI;
     this.authorities = authorities;
   }
@@ -44,6 +46,7 @@ public class UserDetailsImpl implements UserDetails {
             user.getEmail(),    // Asegúrate que User.getEmail() existe
             user.getPassword(), // Asegúrate que User.getPassword() existe
             user.getIdHotel(),
+            user.getIdTrabajador(),
             user.getDNI(),
             authorities);
   }
@@ -61,16 +64,19 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public String getUsername() {
-    return email;  // Devuelve el email como 'username' requerido por Spring Security
+    return email;
   }
 
-  // Métodos adicionales
   public Long getId() {
     return id;
   }
 
   public int getIdHotel() {
     return idHotel;
+  }
+
+  public int getIdTrabajador() {
+    return idTrabajador;
   }
 
   public String getDNI() {

@@ -28,7 +28,10 @@ public class User {
     private String password;
 
     @Column
-    private int IdHotel;
+    private int idHotel;
+
+    @Column
+    private int idTrabajador;
 
     @Column
     private String DNI;
@@ -42,10 +45,11 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, int IdHotel, String DNI) {
+    public User(String email, String password, int idHotel, int idTrabajador, String DNI) {
         this.email = email;
         this.password = password;
-        this.IdHotel = IdHotel;
+        this.idHotel = idHotel;
+        this.idTrabajador = idTrabajador;
         this.DNI = DNI;
     }
 
@@ -82,11 +86,19 @@ public class User {
     }
 
     public int getIdHotel() {
-        return IdHotel;
+        return idHotel;
     }
 
-    public void setIdHotel(int IdHotel) {
-        this.IdHotel = IdHotel;
+    public void setIdHotel(int idHotel) {
+        this.idHotel = idHotel;
+    }
+
+    public int getIdTrabajador() {
+        return idTrabajador;
+    }
+
+    public void setIdTrabajador(int idTrabajador) {
+        this.idTrabajador = idTrabajador;
     }
 
     public String getDNI() {

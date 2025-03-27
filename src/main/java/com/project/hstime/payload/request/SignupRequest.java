@@ -16,6 +16,8 @@ public class SignupRequest {
 
   private int idHotel;
 
+  private int idTrabajador;
+
   private String DNI;
 
   @NotBlank
@@ -60,5 +62,13 @@ public class SignupRequest {
 
   public void setIdHotel(int idHotel) {
     this.idHotel = idHotel;
+  }
+
+  public int getIdTrabajador() {
+    return idTrabajador;
+  }
+
+  public void setIdTrabajador(int idTrabajador) {
+    this.idTrabajador = idTrabajador;
   }
 }
