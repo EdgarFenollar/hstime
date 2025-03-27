@@ -1,4 +1,25 @@
 package com.project.hstime.service;
 
-public class MarcajeService {
+import com.project.hstime.domain.Marcaje;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+public interface MarcajeService {
+    //Metodos de busqueda
+    Set<Marcaje> findAll();
+    Optional<Marcaje> findByIdMarcaje(long idMarcaje);
+    Set<Marcaje> findByIdHotelAndIdTrabajador(int idHotel, int idTrabajador);
+    Set<Marcaje> findByFechaHora(Date fechaHora);
+
+    //Metodo de añadir
+    Marcaje addMarcaje(Marcaje marcaje);
+    //Metodo modificar
+    Marcaje modifyMarcaje(long idMarcaje, Marcaje newMarcaje);
+    //Metodo descargar
+    Marcaje descargarMarcaje(long idMarcaje, Marcaje newMarcaje);
+    //Metodo eliminar
+    void deleteMarcaje(long idMarcaje);
 }

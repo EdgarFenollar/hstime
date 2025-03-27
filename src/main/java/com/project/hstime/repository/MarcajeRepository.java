@@ -13,7 +13,7 @@ import java.util.Set;
 public interface MarcajeRepository extends CrudRepository<Marcaje, Long> {
 
     Set<Marcaje> findAll();
-    Optional<Marcaje> findByIdMarcaje(long idLugarInteres);
+    Optional<Marcaje> findByIdMarcaje(long idMarcaje);
     Set<Marcaje> findByIdHotelAndIdTrabajador(int idHotel, int idTrabajador);
     Set<Marcaje> findByFechaHora(Date fechaHora);
 }
