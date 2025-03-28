@@ -5,7 +5,6 @@ import java.util.Date;
 public class MarcajeDTO {
     private int idHotel;
     private int idTrabajador;
-    private Date fechaHora;
     private double latitud;
     private double longitud;
 
@@ -15,9 +14,6 @@ public class MarcajeDTO {
 
     public int getIdTrabajador() { return idTrabajador; }
     public void setIdTrabajador(int idTrabajador) { this.idTrabajador = idTrabajador; }
-
-    public Date getFechaHora() { return fechaHora; }
-    public void setFechaHora(Date fechaHora) { this.fechaHora = fechaHora; }
 
     public double getLatitud() { return latitud; }
     public void setLatitud(double latitud) { this.latitud = latitud; }

@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
 
@@ -106,8 +107,8 @@ public class MarcajeController {
     @GetMapping("/search/fechas")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> getMarcajesByRangoFechas(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date fechaInicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date fechaFin) {
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date fechaFin) {
         try {
             if (fechaInicio.after(fechaFin)) {
                 return ResponseEntity.badRequest()
@@ -189,10 +190,10 @@ public class MarcajeController {
         Marcaje marcaje = new Marcaje();
         marcaje.setIdHotel(dto.getIdHotel());
         marcaje.setIdTrabajador(dto.getIdTrabajador());
-        marcaje.setFechaHora(dto.getFechaHora());
+        marcaje.setFechaHora(new Date());
         marcaje.setLocalizacion(point);
         marcaje.setAccion(accion);
-        marcaje.setDescargado('N'); // Valor por defecto
+        marcaje.setDescargado('N');
 
         return marcaje;
     }

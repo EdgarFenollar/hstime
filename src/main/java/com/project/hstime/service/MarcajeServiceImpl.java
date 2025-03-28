@@ -6,10 +6,7 @@ import com.project.hstime.repository.MarcajeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MarcajeServiceImpl implements MarcajeService{
@@ -44,6 +41,16 @@ public class MarcajeServiceImpl implements MarcajeService{
 
     @Override
     public Set<Marcaje> findByRangoFechas(Date fechaInicio, Date fechaFin) {
+        if (fechaInicio.equals(fechaFin)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fechaFin);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            fechaFin = calendar.getTime();
+        }
+
         return marcajeRepository.findByFechaHoraBetween(fechaInicio, fechaFin);
     }
 
