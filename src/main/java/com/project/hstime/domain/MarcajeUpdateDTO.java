@@ -1,15 +1,18 @@
 package com.project.hstime.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.project.hstime.domain.deserializer.CustomDateDeserializer;
+
 import java.util.Date;
 
 public class MarcajeUpdateDTO {
     private Long idHotel;
     private Long idTrabajador;
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     private Date fechaHora;
     private Double latitud;
     private Double longitud;
     private Character accion;
-    private Character descargado;
 
     public Long getIdHotel() {
         return idHotel;
@@ -57,13 +60,5 @@ public class MarcajeUpdateDTO {
 
     public void setAccion(Character accion) {
         this.accion = accion;
-    }
-
-    public Character getDescargado() {
-        return descargado;
-    }
-
-    public void setDescargado(Character descargado) {
-        this.descargado = descargado;
     }
 }

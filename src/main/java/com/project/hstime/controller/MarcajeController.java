@@ -28,7 +28,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Set;
 
@@ -200,6 +204,7 @@ public class MarcajeController {
 
     @Operation(summary = "Modificar un marcaje", description = """
       Actualiza la información de un marcaje existente.
+      Formato de fecha  10/02/2025-10:54:02.
       **Permisos requeridos**: Solo para administradores.
       """)
     @ApiResponses(value = {
@@ -212,7 +217,7 @@ public class MarcajeController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PutMapping("/update/{idMarcaje}")
+    @PutMapping("/update/{idMarcaje}") //Formato fecha  10/02/2025-10:54:02
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> updateMarcaje(
             @PathVariable long idMarcaje,
@@ -234,13 +239,16 @@ public class MarcajeController {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         Point point = geometryFactory.createPoint(new Coordinate(dto.getLongitud(), dto.getLatitud()));
 
+        // Convert Date to Instant then to LocalDateTime
+        Instant instant = dto.getFechaHora().toInstant();
+        LocalDateTime dateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+
         Marcaje marcaje = new Marcaje();
         marcaje.setIdHotel(Math.toIntExact(dto.getIdHotel()));
         marcaje.setIdTrabajador(Math.toIntExact(dto.getIdTrabajador()));
         marcaje.setFechaHora(dto.getFechaHora());
         marcaje.setLocalizacion(point);
         marcaje.setAccion(dto.getAccion());
-        marcaje.setDescargado(dto.getDescargado());
 
         return marcaje;
     }
