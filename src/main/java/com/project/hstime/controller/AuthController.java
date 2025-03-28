@@ -77,7 +77,7 @@ public class AuthController {
                   content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   @GetMapping("/all")
-  @PreAuthorize("permitAll()")
+  @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
   public ResponseEntity<?> getAllUsers() {
     try {
       List<User> users = userRepository.findAll();

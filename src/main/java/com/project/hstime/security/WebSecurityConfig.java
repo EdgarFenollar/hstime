@@ -70,6 +70,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(
                             "/hstime/auth/**",
+                            "/hstime/marcaje/**",
                             "/v3/api-docs/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html"

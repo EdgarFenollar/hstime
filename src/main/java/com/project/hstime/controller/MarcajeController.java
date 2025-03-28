@@ -81,7 +81,7 @@ public class MarcajeController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("search/{idHotel}/{idTrabajador}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> getMarcajesByHotelAndTrabajador(
             @PathVariable int idHotel,
             @PathVariable int idTrabajador) {

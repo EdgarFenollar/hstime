@@ -1,6 +1,8 @@
 package com.project.hstime.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
 import java.util.Date;
@@ -12,29 +14,31 @@ public class Marcaje {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idMarcaje;
 
-    @Column
+    @Column(nullable = false)
     private int idHotel;
 
-    @Column
+    @Column(nullable = false)
     private int idTrabajador;
 
-    @Column
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     private Date fechaHora;
 
-    @Column(columnDefinition = "POINT")
+    @Column(columnDefinition = "POINT", nullable = true)
+    @JdbcTypeCode(SqlTypes.GEOMETRY)
     private Point localizacion;
 
-    @Column(columnDefinition = "CHAR(1) DEFAULT 'N'")
-    private char descargado;
+    @Column(nullable = false, columnDefinition = "CHAR(1) DEFAULT 'N'")
+    private Character descargado;
 
-    @Column
-    private char accion;
+    @Column(nullable = false)
+    private Character accion;
 
     public Marcaje() {
         this.descargado = 'N';
     }
 
-    public Marcaje(int idHotel, int idTrabajador, Date fechaHora, Point localizacion, char descargado, char accion) {
+    public Marcaje(int idHotel, int idTrabajador, Date fechaHora, Point localizacion, Character accion) {
         this.idHotel = idHotel;
         this.idTrabajador = idTrabajador;
         this.fechaHora = fechaHora;
@@ -83,19 +87,19 @@ public class Marcaje {
         this.localizacion = localizacion;
     }
 
-    public char getDescargado() {
+    public Character getDescargado() {
         return descargado;
     }
 
-    public void setDescargado(char descargado) {
+    public void setDescargado(Character descargado) {
         this.descargado = descargado;
     }
 
-    public char getAccion() {
+    public Character getAccion() {
         return accion;
     }
 
-    public void setAccion(char accion) {
+    public void setAccion(Character accion) {
         this.accion = accion;
     }
 }
