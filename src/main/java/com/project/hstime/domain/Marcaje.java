@@ -1,5 +1,7 @@
 package com.project.hstime.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.project.hstime.domain.deserializer.PointSerializer;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -26,6 +28,7 @@ public class Marcaje {
 
     @Column(columnDefinition = "POINT", nullable = true)
     @JdbcTypeCode(SqlTypes.GEOMETRY)
+    @JsonSerialize(using = PointSerializer.class)
     private Point localizacion;
 
     @Column(nullable = false, columnDefinition = "CHAR(1) DEFAULT 'N'")
