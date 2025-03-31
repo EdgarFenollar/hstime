@@ -145,7 +145,7 @@ public class MarcajeController {
     @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> marcarInicio(@Valid @RequestBody MarcajeDTO marcajeDTO) {
         try {
-            Marcaje marcaje = convertToEntity(marcajeDTO, 'I');
+            Marcaje marcaje = convertToEntity(marcajeDTO, 'E');
             Marcaje nuevoMarcaje = marcajeService.addMarcaje(marcaje);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoMarcaje);
         } catch (DataIntegrityViolationException e) {
@@ -175,7 +175,7 @@ public class MarcajeController {
     @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> marcarFin(@Valid @RequestBody MarcajeDTO marcajeDTO) {
         try {
-            Marcaje marcaje = convertToEntity(marcajeDTO, 'F');
+            Marcaje marcaje = convertToEntity(marcajeDTO, 'S');
             Marcaje nuevoMarcaje = marcajeService.addMarcaje(marcaje);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoMarcaje);
         } catch (DataIntegrityViolationException e) {

@@ -31,6 +31,10 @@ public class User {
     private int idHotel;
 
     @Column
+    @Size(max = 100)
+    private String nombre;
+
+    @Column
     private int idTrabajador;
 
     @Column
@@ -45,9 +49,10 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, int idHotel, int idTrabajador, String DNI) {
+    public User(String email, String password, String nombre, int idHotel, int idTrabajador, String DNI) {
         this.email = email;
         this.password = password;
+        this.nombre = nombre;
         this.idHotel = idHotel;
         this.idTrabajador = idTrabajador;
         this.DNI = DNI;
@@ -83,6 +88,14 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public int getIdHotel() {

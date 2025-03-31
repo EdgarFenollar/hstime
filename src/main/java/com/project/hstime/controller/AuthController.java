@@ -166,6 +166,7 @@ public class AuthController {
     return ResponseEntity.ok(new JwtResponse(jwt,
             userDetails.getId(),
             userDetails.getUsername(),
+            userDetails.getNombre(),
             userDetails.getIdHotel(),
             userDetails.getIdTrabajador(),
             userDetails.getDNI(),
@@ -206,6 +207,7 @@ public class AuthController {
       User user = new User(
               signUpRequest.getEmail(),
               encoder.encode(signUpRequest.getPassword()),
+              signUpRequest.getNombre(),
               signUpRequest.getIdHotel(),
               signUpRequest.getIdTrabajador(),
               signUpRequest.getDNI());
@@ -281,6 +283,10 @@ public class AuthController {
       // Actualizar contraseña solo si se proporciona
       if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
         existingUser.setPassword(encoder.encode(updateUserRequest.getPassword()));
+      }
+
+      if (updateUserRequest.getNombre() != null) {
+        existingUser.setNombre(updateUserRequest.getNombre());
       }
 
       // Actualizar hotel ID si se proporciona

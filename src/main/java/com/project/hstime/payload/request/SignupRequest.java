@@ -14,6 +14,9 @@ public class SignupRequest {
 
   private Set<String> role;
 
+  @Size(max = 100)
+  private String nombre;
+
   private int idHotel;
 
   private int idTrabajador;
@@ -70,5 +73,13 @@ public class SignupRequest {
 
   public void setIdTrabajador(int idTrabajador) {
     this.idTrabajador = idTrabajador;
+  }
+
+  public String getNombre() {
+    return nombre;
+  }
+
+  public void setNombre(String nombre) {
+    this.nombre = nombre;
   }
 }

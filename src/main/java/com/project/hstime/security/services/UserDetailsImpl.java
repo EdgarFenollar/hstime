@@ -16,6 +16,7 @@ public class UserDetailsImpl implements UserDetails {
 
   private Long id;
   private String email;
+  private String nombre;
   private int idHotel;
   private int idTrabajador;
   private String DNI;
@@ -25,11 +26,12 @@ public class UserDetailsImpl implements UserDetails {
 
   private Collection<? extends GrantedAuthority> authorities;
 
-  public UserDetailsImpl(Long id, String email, String password, int idHotel, int idTrabajador, String DNI,
+  public UserDetailsImpl(Long id, String email, String password, String nombre, int idHotel, int idTrabajador, String DNI,
                          Collection<? extends GrantedAuthority> authorities) {
     this.id = id;
     this.email = email;
     this.password = password;
+    this.nombre = nombre;
     this.idHotel = idHotel;
     this.idTrabajador = idTrabajador;
     this.DNI = DNI;
@@ -44,7 +46,8 @@ public class UserDetailsImpl implements UserDetails {
     return new UserDetailsImpl(
             user.getId(),
             user.getEmail(),    // Asegúrate que User.getEmail() existe
-            user.getPassword(), // Asegúrate que User.getPassword() existe
+            user.getPassword(),
+            user.getNombre(),// Asegúrate que User.getPassword() existe
             user.getIdHotel(),
             user.getIdTrabajador(),
             user.getDNI(),
@@ -77,6 +80,10 @@ public class UserDetailsImpl implements UserDetails {
 
   public int getIdTrabajador() {
     return idTrabajador;
+  }
+
+  public String getNombre() {
+    return nombre;
   }
 
   public String getDNI() {

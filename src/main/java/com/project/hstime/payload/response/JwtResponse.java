@@ -7,15 +7,17 @@ public class JwtResponse {
   private String type = "Bearer";
   private Long id;
   private String correo;
+  private String nombre;
   private int idHotel;
   private int idTrabajador;
   private String DNI;
   private List<String> roles;
 
-  public JwtResponse(String accessToken, Long id, String correo, int idHotel, int idTrabajador, String DNI, List<String> roles) {
+  public JwtResponse(String accessToken, Long id, String correo, String nombre, int idHotel, int idTrabajador, String DNI, List<String> roles) {
     this.token = accessToken;
     this.id = id;
     this.correo = correo;
+    this.nombre = nombre;
     this.idHotel = idHotel;
     this.idTrabajador = idTrabajador;
     this.DNI = DNI;
@@ -52,6 +54,14 @@ public class JwtResponse {
 
   public void setCorreo(String email) {
     this.correo = email;
+  }
+
+  public String getNombre() {
+    return nombre;
+  }
+
+  public void setNombre(String nombre) {
+    this.nombre = nombre;
   }
 
   public int getIdHotel() {
