@@ -37,17 +37,21 @@ public class Marcaje {
     @Column(nullable = false)
     private Character accion;
 
+    @Column
+    private String observaciones;
+
     public Marcaje() {
         this.descargado = 'N';
     }
 
-    public Marcaje(int idHotel, int idTrabajador, Date fechaHora, Point localizacion, Character accion) {
+    public Marcaje(int idHotel, int idTrabajador, Date fechaHora, Point localizacion, Character accion, String observaciones) {
         this.idHotel = idHotel;
         this.idTrabajador = idTrabajador;
         this.fechaHora = fechaHora;
         this.localizacion = localizacion;
         this.descargado = 'N';
         this.accion = accion;
+        this.observaciones = observaciones;
     }
 
     public Long getIdMarcaje() {
@@ -104,5 +108,13 @@ public class Marcaje {
 
     public void setAccion(Character accion) {
         this.accion = accion;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }

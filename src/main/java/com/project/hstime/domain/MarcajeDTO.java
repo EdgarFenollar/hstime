@@ -12,6 +12,7 @@ public class MarcajeDTO {
     private double latitud;
     private double longitud;
     private char accion;
+    private String observaciones;
 
     // Getters y Setters
     public int getIdHotel() { return idHotel; }
@@ -29,12 +30,20 @@ public class MarcajeDTO {
     public char getAccion() { return accion; }
     public void setAccion(char accion) { this.accion = accion; }
 
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
+
     // Método para convertir DTO a Entity
     public Marcaje toEntity() {
         GeometryFactory geometryFactory = new GeometryFactory();
         Point point = geometryFactory.createPoint(new Coordinate(longitud, latitud)); // Importante: (longitud, latitud)
 
-        return new Marcaje(idHotel, idTrabajador, new Date(), point, accion);
+        return new Marcaje(idHotel, idTrabajador, new Date(), point, accion, observaciones);
     }
 
     // Método estático para convertir Entity a DTO
@@ -49,6 +58,7 @@ public class MarcajeDTO {
         }
 
         dto.setAccion(marcaje.getAccion());
+        dto.setObservaciones(marcaje.getObservaciones());
         return dto;
     }
 }

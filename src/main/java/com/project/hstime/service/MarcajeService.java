@@ -12,6 +12,7 @@ public interface MarcajeService {
     Set<Marcaje> findAll();
     Optional<Marcaje> findByIdMarcaje(long idMarcaje);
     Set<Marcaje> findByIdHotelAndIdTrabajador(int idHotel, int idTrabajador);
+    Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHora(int idHotel, int idTrabajador, Date fecha);
     Set<Marcaje> findByFechaHora(Date fechaHora);
     Set<Marcaje> findByRangoFechas(Date fechaInicio, Date fechaFin);
     //Metodo de añadir
@@ -22,4 +23,5 @@ public interface MarcajeService {
     Marcaje descargarMarcaje(long idMarcaje);
     //Metodo eliminar
     void deleteMarcaje(long idMarcaje);
+    Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHoraBetween(int idHotel, int idTrabajador, Date startDate, Date endDate);
 }

@@ -35,6 +35,11 @@ public class MarcajeServiceImpl implements MarcajeService{
     }
 
     @Override
+    public Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHora(int idHotel, int idTrabajador, Date fecha) {
+        return marcajeRepository.findByIdHotelAndIdTrabajadorAndFechaHora(idHotel, idTrabajador, fecha);
+    }
+
+    @Override
     public Marcaje addMarcaje (Marcaje marcaje) {
         return marcajeRepository.save(marcaje);
     }
@@ -83,5 +88,10 @@ public class MarcajeServiceImpl implements MarcajeService{
         marcajeRepository.findByIdMarcaje(idMarcaje)
                 .orElseThrow(() -> new MarcajeNotFoundException(idMarcaje));
         marcajeRepository.deleteById(idMarcaje);
+    }
+
+    @Override
+    public Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHoraBetween(int idHotel, int idTrabajador, Date startDate, Date endDate) {
+        return marcajeRepository.findByIdHotelAndIdTrabajadorAndFechaHoraBetween(idHotel, idTrabajador, startDate, endDate);
     }
 }

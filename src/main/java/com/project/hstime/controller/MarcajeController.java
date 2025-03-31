@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
@@ -87,6 +88,47 @@ public class MarcajeController {
             @PathVariable int idTrabajador) {
         try {
             Set<Marcaje> marcajes = marcajeService.findByIdHotelAndIdTrabajador(idHotel, idTrabajador);
+            return ResponseEntity.ok(marcajes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error al obtener marcajes: " + e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "Obtener marcajes por hotel, trabajador y fecha", description = """
+          Devuelve los marcajes de un trabajador específico en un hotel determinado.
+          **Permisos requeridos**: Solamente Administradores.
+          """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Marcajes obtenidos exitosamente.",
+                    content = @Content(schema = @Schema(implementation = Marcaje.class))),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para acceder a esta información.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("search/day/{idHotel}/{idTrabajador}")
+    @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> getMarcajesByHotelAndTrabajadorAndDay(
+            @PathVariable int idHotel,
+            @PathVariable int idTrabajador,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date fecha) {
+        try {
+            // Crear rango de fechas para el día completo
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(fecha);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            Date startDate = cal.getTime();
+
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            Date endDate = cal.getTime();
+
+            Set<Marcaje> marcajes = marcajeService.findByIdHotelAndIdTrabajadorAndFechaHoraBetween(
+                    idHotel, idTrabajador, startDate, endDate);
             return ResponseEntity.ok(marcajes);
         } catch (Exception e) {
             return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -198,6 +240,7 @@ public class MarcajeController {
         marcaje.setLocalizacion(point);
         marcaje.setAccion(accion);
         marcaje.setDescargado('N');
+        marcaje.setObservaciones(dto.getObservaciones());
 
         return marcaje;
     }
@@ -249,6 +292,7 @@ public class MarcajeController {
         marcaje.setFechaHora(dto.getFechaHora());
         marcaje.setLocalizacion(point);
         marcaje.setAccion(dto.getAccion());
+        marcaje.setObservaciones(dto.getObservaciones());
 
         return marcaje;
     }

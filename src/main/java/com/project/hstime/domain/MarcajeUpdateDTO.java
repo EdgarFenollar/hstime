@@ -13,6 +13,7 @@ public class MarcajeUpdateDTO {
     private Double latitud;
     private Double longitud;
     private Character accion;
+    private String observaciones;
 
     public Long getIdHotel() {
         return idHotel;
@@ -60,5 +61,13 @@ public class MarcajeUpdateDTO {
 
     public void setAccion(Character accion) {
         this.accion = accion;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }
