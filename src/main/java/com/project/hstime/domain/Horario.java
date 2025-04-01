@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "horario")
-public class Horario {
+public class    Horario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idHorario;
