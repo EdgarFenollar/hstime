@@ -1,15 +1,15 @@
 package com.project.hstime.service;
 
 import com.project.hstime.domain.Horario;
-import com.project.hstime.domain.Marcaje;
 import com.project.hstime.exception.HorarioNotFoundException;
-import com.project.hstime.exception.MarcajeNotFoundException;
 import com.project.hstime.repository.HorarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
 
+@Service
 public class HorarioServiceImpl implements HorarioService{
     @Autowired
     private HorarioRepository horarioRepository;
