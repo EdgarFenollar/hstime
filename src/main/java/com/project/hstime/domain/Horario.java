@@ -39,17 +39,21 @@ public class    Horario {
     @Size(max = 100)
     private String horario;
 
+    @Column
+    private double horas;
+
     public Horario() {
         this.concepto = null;
         this.horario = null;
     }
 
-    public Horario(Long idHorario, int idHotel, int idTrabajador, Date fecha, String departamento) {
+    public Horario(Long idHorario, int idHotel, int idTrabajador, Date fecha, String departamento, double horas) {
         this.idHorario = idHorario;
         this.idHotel = idHotel;
         this.idTrabajador = idTrabajador;
         this.fecha = fecha;
         this.departamento = departamento;
+        this.horas = horas;
 
     }
 
@@ -107,5 +111,13 @@ public class    Horario {
 
     public void setHorario(String horario) {
         this.horario = horario;
+    }
+
+    public double getHoras() {
+        return horas;
+    }
+
+    public void setHoras(double horas) {
+        this.horas = horas;
     }
 }
