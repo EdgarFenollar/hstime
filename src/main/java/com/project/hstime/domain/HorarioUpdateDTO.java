@@ -13,6 +13,7 @@ public class HorarioUpdateDTO {
     private String departamento;
     private String concepto;
     private String horario;
+    private double horas;
 
     public Long getIdHotel() {
         return idHotel;
@@ -60,5 +61,13 @@ public class HorarioUpdateDTO {
 
     public void setHorario(String horario) {
         this.horario = horario;
+    }
+
+    public double getHoras() {
+        return horas;
+    }
+
+    public void setHoras(double horas) {
+        this.horas = horas;
     }
 }

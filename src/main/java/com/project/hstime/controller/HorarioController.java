@@ -90,6 +90,7 @@ public class HorarioController {
         horario.setDepartamento(dto.getDepartamento());
         horario.setConcepto(dto.getConcepto());
         horario.setHorario(dto.getHorario());
+        horario.setHoras(dto.getHoras());
         return horario;
     }
 
@@ -163,7 +164,7 @@ public class HorarioController {
         horario.setDepartamento(dto.getDepartamento());
         horario.setConcepto(dto.getConcepto());
         horario.setHorario(dto.getHorario());
-
+        horario.setHoras(dto.getHoras());
         return horario;
     }
 

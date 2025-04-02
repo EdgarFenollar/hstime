@@ -22,6 +22,9 @@ public class HorarioDTO {
     @NotNull
     private String horario;
 
+    @NotNull
+    private double horas;
+
     public Integer getIdHotel() {
         return idHotel;
     }
@@ -68,5 +71,13 @@ public class HorarioDTO {
 
     public void setHorario(String horario) {
         this.horario = horario;
+    }
+
+    public double getHoras() {
+        return horas;
+    }
+
+    public void setHoras(double horas) {
+        this.horas = horas;
     }
 }
