@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.ErrorResponse;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Set;
 
 @RestController
@@ -94,9 +96,9 @@ public class HorarioController {
         return horario;
     }
 
-    @Operation(summary = "Obtener horarios por hotel y trabajador", description = """
+    @Operation(summary = "Obtener horarios por hotel y trabajador entre fechas", description = """
           Devuelve los horarios de un trabajador específico en un hotel determinado.
-          **Permisos requeridos**: Solamente Administradores.
+          **Permisos requeridos**: Administradores y trabajadores.
           """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Horarios obtenidos exitosamente.",
@@ -110,9 +112,11 @@ public class HorarioController {
     @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> getMarcajesByHotelAndTrabajador(
             @PathVariable int idHotel,
-            @PathVariable int idTrabajador) {
+            @PathVariable int idTrabajador,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date fechaInicio,
+            @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy") Date fechaFin) {
         try {
-            Set<Horario> horarios = horarioService.findByIdHotelAndIdTrabajador(idHotel, idTrabajador);
+            Set<Horario> horarios = horarioService.findByRangoFechas(idHotel, idTrabajador, fechaInicio, fechaFin);
             return ResponseEntity.ok(horarios);
         } catch (Exception e) {
             return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
