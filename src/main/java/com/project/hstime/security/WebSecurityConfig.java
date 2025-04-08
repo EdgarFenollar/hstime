@@ -71,6 +71,8 @@ public class WebSecurityConfig {
                     .requestMatchers(
                             "/hstime/auth/**",
                             "/hstime/marcaje/**",
+                            "/hstime/horario/**",
+                            "/hstime/hotel/**",
                             "/v3/api-docs/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html"
