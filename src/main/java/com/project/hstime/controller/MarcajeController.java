@@ -36,6 +36,7 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("hstime/marcaje")
@@ -351,6 +352,154 @@ public class MarcajeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Error al eliminar marcaje: " + e.getMessage()));
+        }
+    }
+
+    // Metodos para la descarga de marcajes:
+
+    // Obtener marcajes no descargados por hotel
+    @Operation(summary = "Obtener marcajes no descargados por hotel", description = """
+          Devuelve una lista de marcajes no descargados para un hotel específico.
+          **Permisos requeridos**: Solo para administradores.
+          """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de marcajes no descargados obtenida exitosamente.",
+                    content = @Content(schema = @Schema(implementation = Marcaje.class))),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/no-descargados/{idHotel}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> getMarcajesNoDescargados(@PathVariable int idHotel) {
+        try {
+            // Primero obtenemos todos los marcajes del hotel
+            Set<Marcaje> todosMarcajes = marcajeService.findByIdHotelAndIdTrabajador(idHotel, 0); // 0 como valor por defecto para idTrabajador
+            // Filtramos solo los no descargados
+            Set<Marcaje> marcajesNoDescargados = todosMarcajes.stream()
+                    .filter(m -> m.getDescargado() == 'N')
+                    .collect(Collectors.toSet());
+            return ResponseEntity.ok(marcajesNoDescargados);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error al obtener marcajes no descargados: " + e.getMessage()));
+        }
+    }
+
+    // Obtener marcajes por hotel, rango de fechas y trabajador
+    @Operation(summary = "Obtener marcajes por hotel, fechas y trabajador", description = """
+          Devuelve todos los marcajes para un hotel, rango de fechas y trabajador específico,
+          y marca los no descargados como descargados.
+          **Permisos requeridos**: Solo para administradores.
+          """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de marcajes obtenida exitosamente.",
+                    content = @Content(schema = @Schema(implementation = Marcaje.class))),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/hotel/{idHotel}/fechas/{fechaInicio}/{fechaFin}/trabajador/{idTrabajador}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> getMarcajesByHotelFechasAndTrabajador(
+            @PathVariable int idHotel,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaInicio,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaFin,
+            @PathVariable int idTrabajador) {
+        try {
+            // Ajustar el rango de fechas
+            Calendar calendar = Calendar.getInstance();
+
+            // Establecer fechaInicio a las 00:00:00.000
+            calendar.setTime(fechaInicio);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date startDate = calendar.getTime();
+
+            // Establecer fechaFin a las 23:59:59.999
+            calendar.setTime(fechaFin);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            Date endDate = calendar.getTime();
+
+            Set<Marcaje> marcajes = marcajeService.findByIdHotelAndIdTrabajadorAndFechaHoraBetween(
+                    idHotel, idTrabajador, startDate, endDate);
+
+            // Marcar no descargados como descargados
+            marcajes.stream()
+                    .filter(m -> m.getDescargado() == 'N')
+                    .forEach(m -> marcajeService.descargarMarcaje(m.getIdMarcaje()));
+
+            return ResponseEntity.ok(marcajes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error al obtener marcajes: " + e.getMessage()));
+        }
+    }
+
+    // Obtener marcajes por hotel y rango de fechas
+    @Operation(summary = "Obtener marcajes por hotel y fechas", description = """
+          Devuelve todos los marcajes para un hotel y rango de fechas específico,
+          y marca los no descargados como descargados.
+          **Permisos requeridos**: Solo para administradores.
+          """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de marcajes obtenida exitosamente.",
+                    content = @Content(schema = @Schema(implementation = Marcaje.class))),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/hotel/{idHotel}/fechas/{fechaInicio}/{fechaFin}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> getMarcajesByHotelAndFechas(
+            @PathVariable int idHotel,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaInicio,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaFin) {
+        try {
+            // Ajustar el rango de fechas
+            Calendar calendar = Calendar.getInstance();
+
+            // Establecer fechaInicio a las 00:00:00.000
+            calendar.setTime(fechaInicio);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date startDate = calendar.getTime();
+
+            // Establecer fechaFin a las 23:59:59.999
+            calendar.setTime(fechaFin);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            Date endDate = calendar.getTime();
+
+            // Obtener todos los marcajes en el rango de fechas
+            Set<Marcaje> todosMarcajes = marcajeService.findByRangoFechas(startDate, endDate);
+
+            // Filtrar por hotel
+            Set<Marcaje> marcajes = todosMarcajes.stream()
+                    .filter(m -> m.getIdHotel() == idHotel)
+                    .collect(Collectors.toSet());
+
+            // Marcar no descargados como descargados
+            marcajes.stream()
+                    .filter(m -> m.getDescargado() == 'N')
+                    .forEach(m -> marcajeService.descargarMarcaje(m.getIdMarcaje()));
+
+            return ResponseEntity.ok(marcajes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error al obtener marcajes: " + e.getMessage()));
         }
     }
 }
