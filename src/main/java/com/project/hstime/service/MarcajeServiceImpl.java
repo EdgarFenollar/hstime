@@ -30,6 +30,11 @@ public class MarcajeServiceImpl implements MarcajeService{
     }
 
     @Override
+    public Set<Marcaje> findByIdHotel(int idHotel) {
+        return marcajeRepository.findByIdHotel(idHotel);
+    }
+
+    @Override
     public Set<Marcaje> findByFechaHora(Date fechaHora) {
         return marcajeRepository.findByFechaHora(fechaHora);
     }

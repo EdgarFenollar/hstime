@@ -15,6 +15,7 @@ public interface MarcajeRepository extends CrudRepository<Marcaje, Long> {
     Set<Marcaje> findAll();
     Optional<Marcaje> findByIdMarcaje(long idMarcaje);
     Set<Marcaje> findByIdHotelAndIdTrabajador(int idHotel, int idTrabajador);
+    Set<Marcaje> findByIdHotel(int idHotel);
     Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHora(int idHotel, int idTrabajador, Date fecha);
     Set<Marcaje> findByFechaHora(Date fechaHora);
     Set<Marcaje> findByFechaHoraBetween(Date fechaInicio, Date fechaFin);

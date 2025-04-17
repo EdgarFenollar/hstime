@@ -24,4 +24,5 @@ public interface MarcajeService {
     //Metodo eliminar
     void deleteMarcaje(long idMarcaje);
     Set<Marcaje> findByIdHotelAndIdTrabajadorAndFechaHoraBetween(int idHotel, int idTrabajador, Date startDate, Date endDate);
+    Set<Marcaje> findByIdHotel(int idHotel);
 }

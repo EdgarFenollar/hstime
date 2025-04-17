@@ -374,13 +374,17 @@ public class MarcajeController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> getMarcajesNoDescargados(@PathVariable int idHotel) {
         try {
-            // Primero obtenemos todos los marcajes del hotel
-            Set<Marcaje> todosMarcajes = marcajeService.findByIdHotelAndIdTrabajador(idHotel, 0); // 0 como valor por defecto para idTrabajador
-            // Filtramos solo los no descargados
-            Set<Marcaje> marcajesNoDescargados = todosMarcajes.stream()
+            Set<Marcaje> marcajes = marcajeService.findByIdHotel(idHotel);
+
+            Set<Marcaje> noDescargados = marcajes.stream()
                     .filter(m -> m.getDescargado() == 'N')
                     .collect(Collectors.toSet());
-            return ResponseEntity.ok(marcajesNoDescargados);
+
+            // Marcar como descargados
+            noDescargados.stream()
+                    .forEach(m -> marcajeService.descargarMarcaje(m.getIdMarcaje()));
+
+            return ResponseEntity.ok(noDescargados);
         } catch (Exception e) {
             return ResponseEntity.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Error al obtener marcajes no descargados: " + e.getMessage()));
